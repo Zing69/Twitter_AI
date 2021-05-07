@@ -4,6 +4,7 @@ import com.relevantcodes.extentreports.LogStatus;
 import io.restassured.RestAssured;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
+import org.openqa.selenium.By;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -38,6 +39,19 @@ public class Twitter_UseCase_1and2 extends Abstract_Class {
         Base_Class.writeTweet().tweetButton();
         Thread.sleep(2000);
 
+        //UI verification process
+
+        driver.navigate().refresh();
+        Thread.sleep(3000);
+        String text1 = driver.findElements(By.xpath("//div[@class='css-901oao r-1fmj7o5 r-1qd0xha r-a023e6 r-16dba41 r-rjixqe r-bcqeeo r-bnwqim r-qvutc0']")).get(0).getText();
+        if (text1.equals("PERM IS A PIECE OF SCHMIDT")){
+            System.out.println("Tweet has been posted");
+            printLog.log(LogStatus.PASS,"Tweet has been posted");
+        } else {
+            System.out.println("Tweet has not been posted");
+            printLog.log(LogStatus.FAIL,"Tweet has not been posted");
+        }
+
         //API verify tweet is created
         Response Resp =
                 given().
@@ -48,17 +62,6 @@ public class Twitter_UseCase_1and2 extends Abstract_Class {
 
         String getTweet = Resp.asString();
         JsonPath js = new JsonPath(getTweet);
-        String text1 = js.get("text[0]").toString();
-        System.out.println("The recent tweet text is " + text1);
-
-        if (text1.equals("PERM IS A PIECE OF SCHMIDT")) {
-            System.out.println("Tweet has been posted");
-            Abstract_Class.printLog.log(LogStatus.PASS, "Tweet has been posted");
-        } else {
-            System.out.println("Tweet has not been posted");
-            Abstract_Class.printLog.log(LogStatus.FAIL, "Tweet has not been posted");
-        }
-        //get ID of new tweet
         Tweetid = (js.get("id[0]")).toString();
         System.out.println("Id of newly created tweet is " + Tweetid);
 
@@ -103,7 +106,6 @@ public class Twitter_UseCase_1and2 extends Abstract_Class {
     @Test(priority = 2)
     public void useCase2() throws InterruptedException {
         String postTweet = null;
-
         for (int i = 0; i < 20; i++) {
             postTweet = "Message #" + (i + 1);
             Response Resp = given()
@@ -121,12 +123,35 @@ public class Twitter_UseCase_1and2 extends Abstract_Class {
         }
 
         driver.navigate().to("https://twitter.com");
+        Thread.sleep(2000);
         Base_Class.twitterHomePage().logInButton();
         Thread.sleep(2000);
         Base_Class.twitterHomePage().username("Tenzing_JFC");
         Base_Class.twitterHomePage().password("Wherestibet1");
         Base_Class.twitterHomePage().finalizeLogIn();
         Thread.sleep(2000);
+
+        //UI verify tweet
+        driver.navigate().refresh();
+        Thread.sleep(3000);
+            String verifytweet20 = driver.findElements(By.xpath("//div[@class='css-901oao r-1fmj7o5 r-1qd0xha r-a023e6 r-16dba41 r-rjixqe r-bcqeeo r-bnwqim r-qvutc0']")).get(0).getText();
+            if (verifytweet20.equals("Message #20")){
+                System.out.println("Tweet has been posted");
+                printLog.log(LogStatus.PASS, "Tweet has been posted");
+            } else {
+                System.out.println("Tweet has not been posted");
+                printLog.log(LogStatus.FAIL, "Tweet has not been posted");
+            }
+        String verifyTweet19 = driver.findElements(By.xpath("//div[@class='css-901oao r-1fmj7o5 r-1qd0xha r-a023e6 r-16dba41 r-rjixqe r-bcqeeo r-bnwqim r-qvutc0']")).get(2).getText();
+        if (verifyTweet19.equals("Message #19")){
+            System.out.println("Tweet has been posted");
+            printLog.log(LogStatus.PASS, "Tweet has been posted");
+        } else {
+            System.out.println("Tweet has not been posted");
+            printLog.log(LogStatus.FAIL, "Tweet has not been posted" + verifyTweet19);
+        }
+
+
 
         Response Resp =
                 given().
@@ -151,23 +176,25 @@ public class Twitter_UseCase_1and2 extends Abstract_Class {
         System.out.println("The most recent tweet is " + text2 + ". with the following ID: " + secondTweet + ".");
         printLog.log(LogStatus.INFO, "The most recent tweet is " + text2 + ". with the following ID: " + secondTweet + ".");
 
-        Response Resp2 =
-                given().
-                        auth().oauth(consumerKey, consumerSecret, accessToken, tokenSecret).
-                        queryParam("screen_name", "@Tenzing_JFC")
-                        .when().get("user_timeline.json")
-                        .then().extract().response();
+
         for (int i = 0; i < 20; i++) {
+            Response Resp2 =
+                    given().
+                            auth().oauth(consumerKey, consumerSecret, accessToken, tokenSecret).
+                            queryParam("screen_name", "@Tenzing_JFC")
+                            .when().get("user_timeline.json")
+                            .then().extract().response();
+
             String deleteTweet = Resp2.asString();
             JsonPath jd = new JsonPath(deleteTweet);
-            Tweetid = (jd.get("id[" + i  + "]")).toString();
+            String delete20Tweets = (jd.get("id[0]")).toString();
 
             given().
                     auth().oauth(consumerKey, consumerSecret, accessToken, tokenSecret).
-                    queryParam("id", Tweetid)
+                    queryParam("id", delete20Tweets)
                     .when().post("destroy.json")
                     .then();
-            System.out.println("Tweet message " + (i+1) + " with ID" + Tweetid + " has been deleted.");
+            System.out.println("Tweet message " + (i+1) + " with ID" + delete20Tweets + " has been deleted.");
             Thread.sleep(2000);
         }//end of loop
 

@@ -114,7 +114,7 @@ public class Twitter_ActionItem2 extends Abstract_Class  {
             JsonPath jv = new JsonPath(getTweet2);
             String text1 = jv.get("text[0]").toString();
             System.out.println("The recent tweet text is " + text1);
-            String text2 = jv.get("text[1]").toString();
+            String text2 = jv.get("text[0]").toString();
             System.out.println("The recent tweet text is " + text2);
             if (text1.equals("Message #5")){
                 System.out.println("Tweet has not been deleted");
